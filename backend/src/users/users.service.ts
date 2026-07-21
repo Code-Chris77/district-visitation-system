@@ -42,12 +42,12 @@ export class UsersService {
       where: { id },
     });
   }
-}
-async findByEmail(email: string) {
-  return this.prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-}
 
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+  }
+}
