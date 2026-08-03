@@ -1,27 +1,28 @@
 import api from "@/lib/axios";
+import { Member, CreateMemberDto, UpdateMemberDto } from "../types";
 
 export const MemberService = {
-  async getAll() {
-    const res = await api.get("/members");
-    return res.data;
+  getAll: async (): Promise<Member[]> => {
+    const response = await api.get<Member[]>("/members");
+    return response.data;
   },
 
-  async getOne(id: string) {
-    const res = await api.get(`/members/${id}`);
-    return res.data;
+  getById: async (id: string): Promise<Member> => {
+    const response = await api.get<Member>(`/members/${id}`);
+    return response.data;
   },
 
-  async create(data: any) {
-    const res = await api.post("/members", data);
-    return res.data;
+  create: async (data: any): Promise<Member> => {
+    const response = await api.post<Member>("/members", data);
+    return response.data;
   },
 
-  async update(id: string, data: any) {
-    const res = await api.patch(`/members/${id}`, data);
-    return res.data;
+  update: async (id: string, data: any): Promise<Member> => {
+    const response = await api.patch<Member>(`/members/${id}`, data);
+    return response.data;
   },
 
-  async remove(id: string) {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/members/${id}`);
   },
 };

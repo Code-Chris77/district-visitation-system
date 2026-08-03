@@ -7,7 +7,7 @@ export function useMembers() {
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function loadMembers() {
+  async function reload() {
     try {
       const data = await MemberService.getAll();
       setMembers(data);
@@ -17,12 +17,12 @@ export function useMembers() {
   }
 
   useEffect(() => {
-    loadMembers();
+    reload();
   }, []);
 
   return {
     members,
     loading,
-    reload: loadMembers,
+    reload,
   };
 }

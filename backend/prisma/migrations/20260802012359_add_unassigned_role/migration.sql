@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "UserRole" ADD VALUE 'UNASSIGNED';
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "role" SET DEFAULT 'UNASSIGNED';

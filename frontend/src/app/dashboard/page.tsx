@@ -1,42 +1,43 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import StatsCard from "@/components/dashboard/StatsCard";
-import {
-  Users,
-  CalendarCheck,
-  Clock3,
-  Building2,
-} from "lucide-react";
+"use client";
 
-export default function DashboardPage() {
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+
+export default function DashboardRedirectPage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+
+      switch (user.role) {
+        case "ADMIN":
+          router.push("/admin/dashboard");
+          break;
+        case "PASTOR":
+          router.push("/pastor/dashboard");
+          break;
+        case "ELDER":
+          router.push("/elder/dashboard");
+          break;
+        case "DATA_OFFICER":
+          router.push("/data-officer/dashboard");
+          break;
+        default:
+          router.push("/login");
+          break;
+      }
+    }
+  }, [user, loading, router]);
+
   return (
-    <DashboardLayout>
-      <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
-
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <StatsCard
-          title="Total Members"
-          value={0}
-          icon={Users}
-        />
-
-        <StatsCard
-          title="Visits Today"
-          value={0}
-          icon={CalendarCheck}
-        />
-
-        <StatsCard
-          title="Pending Visits"
-          value={0}
-          icon={Clock3}
-        />
-
-        <StatsCard
-          title="Locals"
-          value={11}
-          icon={Building2}
-        />
-      </div>
-    </DashboardLayout>
+    <div className="min-h-screen bg-[#0B1120] flex items-center justify-center text-white text-xs">
+      Loading your workspace...
+    </div>
   );
 }

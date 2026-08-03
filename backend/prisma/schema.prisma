@@ -8,74 +8,126 @@ datasource db {
 }
 
 enum UserRole {
+  UNASSIGNED
   ADMIN
   PASTOR
   ELDER
   DATA_OFFICER
 }
 
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model District {
+  id   String @id @default(cuid())
+  name String
+
+  locals Local[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Local {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  members   Member[]
-  users     User[]
+  id String @id @default(cuid())
+
+  name String
+  code String @unique
+
+  districtId String?
+  district   District? @relation(fields: [districtId], references: [id])
+
+  users   User[]
+  members Member[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model User {
-  id         String    @id @default(cuid())
-  firstName  String
-  lastName   String
-  email      String    @unique
-  password   String
-  phone      String?
-  role       UserRole
-  localId    String?
+  id String @id @default(cuid())
 
-  isActive   Boolean   @default(true)
-  lastLogin  DateTime?
+  firstName String
+  lastName  String
 
-  local       Local?   @relation(fields: [localId], references: [id])
-  visitNotes  Visit[]
+  email    String  @unique
+  password String?
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-model Member {
-  id         String   @id @default(cuid())
-  firstName  String
-  lastName   String
-  phone       String?
-  gender      String?
-  occupation  String?
-  address     String?
-  landmark    String?
+  googleId String? @unique
+  picture  String?
 
-  latitude    Float?
-  longitude   Float?
+  phone String?
 
-  localId String
+  role   UserRole   @default(UNASSIGNED)
+  status UserStatus @default(PENDING)
 
-  local  Local @relation(fields: [localId], references: [id])
-  visits Visit[]
+  isActive Boolean @default(true)
+
+  lastLogin DateTime?
+
+  localId String?
+  local   Local?  @relation(fields: [localId], references: [id])
+
+  membersCreated Member[] @relation("MemberCreator")
+
+  pastorVisits Visit[] @relation("PastorVisits")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Visit {
-  id        String   @id @default(cuid())
+model Member {
+  id String @id @default(cuid())
 
-  memberId  String
-  pastorId  String
+  firstName String
+  lastName  String
 
-  visitDate DateTime
-  notes     String?
+  phone String
 
-  member Member @relation(fields: [memberId], references: [id])
-  pastor User   @relation(fields: [pastorId], references: [id])
+  gender String
+
+  landmark String?
+
+  latitude  Float
+  longitude Float
+
+  accuracy Float?
+
+  capturedAt DateTime @default(now())
+
+  localId String
+  local   Local  @relation(fields: [localId], references: [id])
+
+  createdById String?
+  createdBy   User?   @relation("MemberCreator", fields: [createdById], references: [id])
+
+  visits Visit[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([localId])
+}
+
+model Visit {
+  id String @id @default(cuid())
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  pastorId String
+  pastor   User   @relation("PastorVisits", fields: [pastorId], references: [id])
+
+  visitDate DateTime @default(now())
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([memberId])
+  @@index([pastorId])
 }
