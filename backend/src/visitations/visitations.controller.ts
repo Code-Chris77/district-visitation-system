@@ -15,34 +15,44 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class VisitationsController {
   constructor(private readonly visitationsService: VisitationsService) {}
 
-  // ➕ POST /visits - Record a new visitation log
   @UseGuards(JwtAuthGuard)
-  @Post()
-  async create(@Request() req: any, @Body() body: any) {
-    return this.visitationsService.create({
-      ...body,
-      pastorId: req.user?.id || body.pastorId, // Automatically attaches logged-in Pastor
-    });
+  @Post('plan')
+  async createPlan(
+    @Request() req: any,
+    @Body() body: { localId: string; title?: string; durationDays: number; startDate: string },
+  ) {
+    const pastorId = req.user?.id || req.user?.sub;
+    return this.visitationsService.createVisitationPlan(pastorId, body);
   }
 
-  // 📜 GET /visits/reports - Formatted timeline and historical observations
+  @UseGuards(JwtAuthGuard)
+  @Get('plan/active')
+  async getActivePlan(@Request() req: any) {
+    const pastorId = req.user?.id || req.user?.sub;
+    return this.visitationsService.getActivePlan(pastorId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('plan/member/:planMemberId/complete')
+  async completePlanVisit(
+    @Param('planMemberId') planMemberId: string,
+    @Request() req: any,
+    @Body('notes') notes?: string,
+  ) {
+    const pastorId = req.user?.id || req.user?.sub;
+    return this.visitationsService.completePlanVisit(planMemberId, pastorId, notes);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('reports')
   async getReports() {
     return this.visitationsService.getVisitationReports();
   }
 
-  // 📋 GET /visits - Queue list
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async findAll() {
-    return this.visitationsService.findAll();
-  }
-
-  // ✏️ PATCH /visits/:id - Update status or notes
-  @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
-    return this.visitationsService.update(id, body);
+  @Get('plan/history')
+  async getPlanHistory(@Request() req: any) {
+    const pastorId = req.user?.id || req.user?.sub;
+    return this.visitationsService.getPlanHistory(pastorId);
   }
 }

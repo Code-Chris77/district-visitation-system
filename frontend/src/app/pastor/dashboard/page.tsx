@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import TodaysRouteCard from "@/features/visitations/components/TodaysRouteCard";
 import {
   Users,
   MapPin,
-  ClipboardList,
+  Calendar,
   HeartHandshake,
   ArrowRight,
   TrendingUp,
@@ -34,15 +33,24 @@ export default function PastorDashboard() {
     async function loadPastorStats() {
       try {
         setLoading(true);
-        const [membersRes, assembliesRes] = await Promise.all([
+        const [membersRes, assembliesRes, visitsRes] = await Promise.all([
           api.get("/members").catch(() => ({ data: [] })),
           api.get("/locals").catch(() => ({ data: [] })),
+          api.get("/visits/reports").catch(() => ({ data: [] })),
         ]);
+
+        // Calculate total historical visits across all member reports
+        const totalVisitsCount = Array.isArray(visitsRes.data)
+          ? visitsRes.data.reduce(
+              (acc: number, item: any) => acc + (item.visitCount || 0),
+              0
+            )
+          : 0;
 
         setStats({
           totalMembers: membersRes.data?.length || 0,
           totalAssemblies: assembliesRes.data?.length || 0,
-          recentVisits: 0,
+          recentVisits: totalVisitsCount,
         });
       } catch (err) {
         console.error("Failed to load Pastor stats:", err);
@@ -72,10 +80,10 @@ export default function PastorDashboard() {
           </div>
 
           <Link
-            href="/pastor/visits"
+            href="/pastor/planner"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition self-start md:self-auto"
           >
-            <ClipboardList size={16} /> Plan New Visit Route
+            <Calendar size={16} /> Create Visitation Plan
           </Link>
         </div>
 
@@ -122,37 +130,36 @@ export default function PastorDashboard() {
               {loading ? "..." : stats.recentVisits}
             </p>
             <p className="text-[11px] text-emerald-400/80 font-medium">
-              Pastoral visitations this month
+              Pastoral visitations logged
             </p>
           </div>
         </div>
 
         {/* Action Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Visitation Route Planner Card */}
+          {/* Pastoral Planner Card */}
           <div className="p-6 rounded-2xl bg-[#151F32] border border-[#1E2D4A] space-y-4">
             <div className="flex items-center gap-3 border-b border-[#1E2D4A] pb-3">
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                <ClipboardList size={20} />
+                <Calendar size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm">Shepherd Visit Planner</h3>
-                <p className="text-xs text-slate-400">Map and schedule household visitations.</p>
+                <h3 className="font-bold text-white text-sm">Pastoral Visitation Planner</h3>
+                <p className="text-xs text-slate-400">Set target assembly schedules & progress queues.</p>
               </div>
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed">
-              Use geographic coordinates and assembly clusters to organize home visits, follow up on missing members, and assign elder companions.
+              Select local assembly targets and timeframe durations. Systematically visit members, record notes, and auto-advance through your active roster.
             </p>
 
             <Link
-              href="/pastor/visits"
+              href="/pastor/planner"
               className="inline-flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 pt-2"
             >
-              Open Visit Planner <ArrowRight size={14} />
+              Open Pastoral Planner <ArrowRight size={14} />
             </Link>
           </div>
-          
 
           {/* Members Roster Card */}
           <div className="p-6 rounded-2xl bg-[#151F32] border border-[#1E2D4A] space-y-4">

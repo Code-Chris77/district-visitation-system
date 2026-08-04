@@ -8,13 +8,12 @@ import {
   LayoutDashboard,
   Users,
   MapPin,
-  ClipboardList,
   ShieldCheck,
   UserPlus,
   LogOut,
   User as UserIcon,
   FileText,
-  Map,
+  Calendar,
 } from "lucide-react";
 
 interface NavItem {
@@ -27,7 +26,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, loading } = useAuth();
 
-  // 8. Show loading placeholder
+  // Show loading placeholder
   if (loading) {
     return <aside className="w-64 min-h-screen bg-[#0B1120] border-r border-[#1E2D4A]" />;
   }
@@ -47,8 +46,9 @@ export default function Sidebar() {
       case "PASTOR":
         return [
           { label: "Dashboard", href: "/pastor/dashboard", icon: LayoutDashboard },
-          { label: "Members", href: "/members", icon: Users },
-          { label: "Visitations & Reports", href: "/pastor/visits", icon: FileText },
+          { label: "Pastoral Planner", href: "/pastor/planner", icon: Calendar }, // 👈 Added Pastoral Planner
+          { label: "Members Directory", href: "/members", icon: Users },
+          { label: "Visitations & Reports", href: "/reports", icon: FileText },
         ];
       case "ELDER":
         return [
@@ -71,13 +71,12 @@ export default function Sidebar() {
   const navItems = getNavItems(user?.role ?? null);
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "User";
 
-  // 9. Dynamic Initials Fallback
+  // Dynamic Initials Fallback
   const initials =
     user?.firstName && user?.lastName
       ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
       : "U";
 
-  // 10. Explicit Logout Handler
   const handleLogout = () => {
     logout();
   };
@@ -123,15 +122,18 @@ export default function Sidebar() {
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            
-           // Active route calculation
-const isActive =
-  pathname === item.href ||
-  (item.href !== "/" &&
-    pathname.startsWith(item.href) &&
-    !navItems.some(
-      (other) => other.href !== item.href && other.href.length > item.href.length && pathname.startsWith(other.href)
-    ));
+
+            // Active route calculation
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" &&
+                pathname.startsWith(item.href) &&
+                !navItems.some(
+                  (other) =>
+                    other.href !== item.href &&
+                    other.href.length > item.href.length &&
+                    pathname.startsWith(other.href)
+                ));
 
             return (
               <Link

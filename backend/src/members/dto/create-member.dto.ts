@@ -34,4 +34,12 @@ export class CreateMemberDto {
   @IsString()
   @IsNotEmpty()
   localId: string;
+
+  @IsOptional()
+  @IsString()
+  residence?: string;
+
+  @IsOptional()
+  @IsString() // Or @IsDateString() if imported from class-validator
+  capturedAt?: string;
 }
