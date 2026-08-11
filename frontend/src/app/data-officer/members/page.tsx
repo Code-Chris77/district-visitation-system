@@ -96,8 +96,7 @@ export default function DataOfficerMembersPage() {
     // 1. Role Scope Filter
     if (
       user?.role === "DATA_OFFICER" ||
-      user?.role === "ELDER" ||
-      user?.role === "DEACON"
+      user?.role === "ELDER"
     ) {
       const userLocalId = user.localId || user.local?.id;
       const memberLocalId = m.localId || m.local?.id;
