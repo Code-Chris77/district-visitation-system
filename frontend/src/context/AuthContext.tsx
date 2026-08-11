@@ -149,6 +149,7 @@ const fetchCurrentUser = async () => {
 
   return newUser;
 });
+};
 
   // =====================================================
   // LOGOUT
