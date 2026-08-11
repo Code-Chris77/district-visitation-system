@@ -27,9 +27,11 @@ export default function DataOfficerDashboard() {
 
       const members = Array.isArray(res.data) ? res.data : [];
 
-      const filteredMembers = members.filter(
-        (member: any) => member.localId === user.localId,
-      );
+     if (!user) return;
+
+const filteredMembers = members.filter(
+  (member: any) => member.localId === user.localId,
+);
 
       setTotalMembers(filteredMembers.length);
     } catch (err) {
