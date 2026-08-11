@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -20,7 +21,7 @@ import {
 import { toast } from "sonner";
 import api from "@/lib/axios";
 
-export default function EditMemberPage() {
+function EditMemberContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const memberId = searchParams.get("id");
@@ -415,5 +416,21 @@ export default function EditMemberPage() {
         </form>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function EditMemberPage() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="p-12 text-center text-white">
+            Loading...
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <EditMemberContent />
+    </Suspense>
   );
 }
