@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +21,8 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
 }
+
+type UserRole = "ADMIN" | "PASTOR" | "ELDER" | "DATA_OFFICER" | "UNASSIGNED";
 
 export default function Sidebar() {
   const pathname = usePathname();
