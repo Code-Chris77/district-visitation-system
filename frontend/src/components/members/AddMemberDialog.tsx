@@ -26,7 +26,15 @@ export default function AddMemberDialog({ reload }: AddMemberDialogProps) {
     try {
       setLoading(true);
 
-      const payload: any = {
+      const payload: {
+        firstName: string;
+        lastName: string;
+        phone: string;
+        address?: string;
+        localId?: string;
+        latitude?: number;
+        longitude?: number;
+      } = {
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
@@ -41,13 +49,30 @@ export default function AddMemberDialog({ reload }: AddMemberDialogProps) {
       toast.success("Member registered successfully!");
       await reload();
       setOpen(false);
-    } catch (error: any) {
-      console.error("Failed to add member:", error?.response?.data || error);
-      const apiMessage = error?.response?.data?.message;
-      const displayMsg = Array.isArray(apiMessage)
-        ? apiMessage.join(", ")
-        : apiMessage || "Failed to register member.";
-      toast.error(displayMsg);
+    } catch (error: unknown) {
+        console.error("Failed to add member:", error);
+        const apiMessage = (() => {
+          if (typeof error === "object" && error !== null) {
+            const e = error as Record<string, unknown>;
+            const response = e.response;
+            if (typeof response === "object" && response !== null) {
+              const resp = response as Record<string, unknown>;
+              const data = resp.data;
+              if (typeof data === "object" && data !== null) {
+                const d = data as Record<string, unknown>;
+                const message = d.message;
+                if (typeof message === "string" || Array.isArray(message)) return message;
+              }
+            }
+            const message = e.message;
+            if (typeof message === "string") return message;
+          }
+          return undefined;
+        })();
+        const displayMsg = Array.isArray(apiMessage)
+          ? apiMessage.join(", ")
+          : apiMessage || "Failed to register member.";
+        toast.error(displayMsg);
     } finally {
       setLoading(false);
     }
@@ -55,7 +80,7 @@ export default function AddMemberDialog({ reload }: AddMemberDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           <Plus size={16} /> Add Member
         </Button>

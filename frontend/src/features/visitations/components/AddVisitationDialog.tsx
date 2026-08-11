@@ -39,7 +39,7 @@ export default function AddVisitationDialog({ reload }: AddVisitationDialogProps
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           <Plus size={16} /> Log New Visit
         </Button>
