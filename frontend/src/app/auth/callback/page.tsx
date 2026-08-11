@@ -21,9 +21,13 @@ function CallbackContent() {
       localStorage.setItem("accessToken", token);
 
       try {
-        const res = await fetch("http://localhost:3001/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://district-visitation-system-taek.onrender.com";
+
+const res = await fetch(`${API_URL}/auth/me`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
           },
         });
 

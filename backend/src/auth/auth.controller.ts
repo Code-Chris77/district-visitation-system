@@ -8,25 +8,23 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-} from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
-import { AuthService } from "./auth.service";
-import { JwtAuthGuard } from "./jwt-auth.guard";
-import { LoginDto } from "./dto/login.dto";
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginDto } from './dto/login.dto';
 
-@Controller("auth")
+@Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   // ==========================================
   // EMAIL LOGIN
   // ==========================================
 
   @HttpCode(HttpStatus.OK)
-  @Post("login")
+  @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -36,7 +34,7 @@ export class AuthController {
   // ==========================================
 
   @UseGuards(JwtAuthGuard)
-  @Get("me")
+  @Get('me')
   async me(@Req() req: any) {
     return this.authService.me(req.user.id);
   }
@@ -45,29 +43,21 @@ export class AuthController {
   // GOOGLE LOGIN
   // ==========================================
 
-  @Get("google")
-  @UseGuards(AuthGuard("google"))
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
   async googleLogin() {}
 
   // ==========================================
   // GOOGLE CALLBACK
   // ==========================================
 
-  @Get("google/callback")
-  @UseGuards(AuthGuard("google"))
-  async googleCallback(
-    @Req() req: any,
-    @Res() res: any,
-  ) {
-    const result =
-      await this.authService.googleLogin(req);
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: any, @Res() res: any) {
+    const result = await this.authService.googleLogin(req);
 
-    const frontend =
-      process.env.FRONTEND_URL ??
-      "http://localhost:3000";
+    const frontend = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
-    return res.redirect(
-      `${frontend}/auth/callback?token=${result.token}`,
-    );
+    return res.redirect(`${frontend}/auth/callback?token=${result.token}`);
   }
 }
