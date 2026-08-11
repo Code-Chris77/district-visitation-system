@@ -78,36 +78,54 @@ export function AuthProvider({
   // LOAD CURRENT USER
   // =====================================================
 
-  const fetchCurrentUser = async () => {
-    try {
-      const token =
-        localStorage.getItem("accessToken") ||
-        localStorage.getItem("token");
+const fetchCurrentUser = async () => {
+  setLoading(true);
 
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+  try {
+    const token =
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("token");
 
-      const res = await api.get("/users/me");
-
-      setUser(res.data);
-    } catch (err) {
-      console.error("Authentication failed", err);
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("accessToken");
-
+    if (!token) {
       setUser(null);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    const res = await api.get("/users/me");
+
+    setUser(res.data);
+
+    // keep local cache fresh
+    localStorage.setItem(
+      "user",
+      JSON.stringify(res.data),
+    );
+  } catch (err) {
+    console.error("Authentication failed", err);
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
-    fetchCurrentUser();
-  }, []);
+  const cachedUser = localStorage.getItem("user");
+
+  if (cachedUser) {
+    try {
+      setUser(JSON.parse(cachedUser));
+    } catch {
+      localStorage.removeItem("user");
+    }
+  }
+
+  fetchCurrentUser();
+}, []);
 
   // =====================================================
   // UPDATE USER LOCALLY
@@ -116,15 +134,21 @@ export function AuthProvider({
   const updateUserData = (
     updatedUser: Partial<User>,
   ) => {
-    setUser((previousUser) => {
-      if (!previousUser) return null;
+  setUser((previousUser) => {
+  if (!previousUser) return null;
 
-      return {
-        ...previousUser,
-        ...updatedUser,
-      };
-    });
+  const newUser = {
+    ...previousUser,
+    ...updatedUser,
   };
+
+  localStorage.setItem(
+    "user",
+    JSON.stringify(newUser),
+  );
+
+  return newUser;
+});
 
   // =====================================================
   // LOGOUT
@@ -139,7 +163,7 @@ export function AuthProvider({
 
     setUser(null);
 
-    window.location.href = "/login";
+    window.location.replace("/login");
   };
 
   return (
