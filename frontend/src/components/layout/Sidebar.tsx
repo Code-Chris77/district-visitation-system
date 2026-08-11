@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,6 +15,8 @@ import {
   User as UserIcon,
   FileText,
   Calendar,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface NavItem {
@@ -27,10 +30,11 @@ type UserRole = "ADMIN" | "PASTOR" | "ELDER" | "DATA_OFFICER" | "UNASSIGNED";
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, loading } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Show loading placeholder
   if (loading) {
-    return <aside className="w-64 min-h-screen bg-[#0B1120] border-r border-[#1E2D4A]" />;
+    return <aside className="hidden md:block w-64 min-h-screen bg-[#0B1120] border-r border-[#1E2D4A]" />;
   }
 
   // Role-based navigation matrix
@@ -48,7 +52,7 @@ export default function Sidebar() {
       case "PASTOR":
         return [
           { label: "Dashboard", href: "/pastor/dashboard", icon: LayoutDashboard },
-          { label: "Pastoral Planner", href: "/pastor/planner", icon: Calendar }, // 👈 Added Pastoral Planner
+          { label: "Pastoral Planner", href: "/pastor/planner", icon: Calendar },
           { label: "Members Directory", href: "/members", icon: Users },
           { label: "Visitations & Reports", href: "/reports", icon: FileText },
         ];
@@ -70,7 +74,7 @@ export default function Sidebar() {
     }
   };
 
-  const navItems = getNavItems(user?.role ?? null);
+  const navItems = getNavItems((user?.role as UserRole) ?? null);
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "User";
 
   // Dynamic Initials Fallback
@@ -84,86 +88,129 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-[#0B1120] border-r border-[#1E2D4A] p-4 flex flex-col justify-between min-h-screen text-white select-none">
-      <div className="space-y-6">
-        {/* Brand Header */}
-        <div className="px-3 pt-2">
-          <div className="font-black text-xl tracking-wider text-blue-500 flex items-center gap-2">
+    <>
+      {/* 📱 Mobile Top Header Toggle Bar (<768px) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#0B1120]/95 backdrop-blur-md border-b border-[#1E2D4A] z-40 px-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 rounded-xl bg-[#151F32] border border-[#1E2D4A] text-white active:scale-95 transition"
+            aria-label="Toggle navigation menu"
+          >
+            <Menu size={20} />
+          </button>
+          <span className="font-black text-base text-blue-500">
             Shepherd
-          </div>
-          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">
-            Buoho District
-          </p>
+          </span>
         </div>
+      </div>
 
-        {/* Dynamic Authenticated User Profile Card */}
-        <div className="p-3 rounded-2xl bg-[#151F32] border border-[#1E2D4A] flex items-center gap-3">
-          {user?.picture ? (
-            <Image
-              src={user.picture}
-              alt={fullName}
-              width={40}
-              height={40}
-              className="rounded-xl border border-blue-500/30 object-cover aspect-square"
-            />
-          ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-sm text-white">
-              {initials}
+      {/* 📱 Mobile Drawer Backdrop */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/80 z-50 backdrop-blur-sm transition-opacity"
+        />
+      )}
+
+      {/* 🖥️ Desktop Sidebar / 📱 Mobile Slide-in Drawer */}
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0B1120] border-r border-[#1E2D4A] p-4 flex flex-col justify-between text-white select-none transition-transform duration-300 ease-in-out shrink-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div className="space-y-6">
+          {/* Brand Header */}
+          <div className="px-3 pt-2 flex items-center justify-between">
+            <div>
+              <div className="font-black text-xl tracking-wider text-blue-500 flex items-center gap-2">
+                Shepherd
+              </div>
+              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">
+                Buoho District
+              </p>
             </div>
-          )}
-
-          <div className="overflow-hidden space-y-0.5">
-            <h4 className="font-bold text-xs text-white truncate">{fullName}</h4>
-            <span className="inline-block text-[9px] font-extrabold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 uppercase">
-              {user?.role ? user.role.replace("_", " ") : "GUEST"}
-            </span>
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden p-1.5 rounded-lg bg-[#151F32] text-slate-400 hover:text-white"
+            >
+              <X size={18} />
+            </button>
           </div>
+
+          {/* Dynamic Authenticated User Profile Card */}
+          <div className="p-3 rounded-2xl bg-[#151F32] border border-[#1E2D4A] flex items-center gap-3">
+            {user?.picture ? (
+              <Image
+                src={user.picture}
+                alt={fullName}
+                width={40}
+                height={40}
+                className="rounded-xl border border-blue-500/30 object-cover aspect-square"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-sm text-white shrink-0">
+                {initials}
+              </div>
+            )}
+
+            <div className="overflow-hidden space-y-0.5">
+              <h4 className="font-bold text-xs text-white truncate">{fullName}</h4>
+              <span className="inline-block text-[9px] font-extrabold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 uppercase">
+                {user?.role ? user.role.replace("_", " ") : "GUEST"}
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Items */}
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+
+              // Active route calculation
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" &&
+                  pathname.startsWith(item.href) &&
+                  !navItems.some(
+                    (other) =>
+                      other.href !== item.href &&
+                      other.href.length > item.href.length &&
+                      pathname.startsWith(other.href)
+                  ));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
+                      : "text-slate-400 hover:bg-[#151F32] hover:text-white"
+                  }`}
+                >
+                  <Icon size={16} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            // Active route calculation
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/" &&
-                pathname.startsWith(item.href) &&
-                !navItems.some(
-                  (other) =>
-                    other.href !== item.href &&
-                    other.href.length > item.href.length &&
-                    pathname.startsWith(other.href)
-                ));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                    : "text-slate-400 hover:bg-[#151F32] hover:text-white"
-                }`}
-              >
-                <Icon size={16} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Sign Out Button */}
-      <div className="pt-4 border-t border-[#1E2D4A]">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition"
-        >
-          <LogOut size={14} /> Sign Out
-        </button>
-      </div>
-    </aside>
+        {/* Sign Out Button */}
+        <div className="pt-4 border-t border-[#1E2D4A]">
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              handleLogout();
+            }}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition"
+          >
+            <LogOut size={14} /> Sign Out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
