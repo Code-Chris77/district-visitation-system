@@ -16,13 +16,19 @@ import {
   FileText,
   Calendar,
   Menu,
-  X,
+  ChevronLeft,
+  CheckSquare,
+  MessageSquare,
+  GraduationCap,
+  Building2,
 } from "lucide-react";
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
+  colorClass: string;
+  bgClass: string;
 }
 
 export default function Sidebar() {
@@ -30,12 +36,12 @@ export default function Sidebar() {
   const { user, logout, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // D. Automatically close mobile drawer when the route changes
+  // Auto-close mobile drawer when route changes
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // 4. Reset drawer state when window resizes to desktop breakpoint (>= 768px)
+  // Reset drawer state when window resizes to desktop (>= 768px)
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -47,42 +53,40 @@ export default function Sidebar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Show loading placeholder
   if (loading) {
     return <aside className="hidden md:block w-72 min-h-screen bg-[#0B1120] border-r border-[#1E2D4A]" />;
   }
 
-  // Role-based navigation matrix
+  // Role-based navigation matrix with custom color accents for each item
   const getNavItems = (role: UserRole | null): NavItem[] => {
     switch (role) {
       case "ADMIN":
         return [
-          { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-          { label: "Users", href: "/admin/users", icon: ShieldCheck },
-          { label: "Members", href: "/members", icon: Users },
-          { label: "Locals", href: "/locals", icon: MapPin },
-          { label: "Reports", href: "/reports", icon: FileText },
-          { label: "Profile", href: "/profile", icon: UserIcon },
+          { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, colorClass: "text-indigo-400", bgClass: "bg-indigo-500/15" },
+          { label: "Users & Security", href: "/admin/users", icon: ShieldCheck, colorClass: "text-rose-400", bgClass: "bg-rose-500/15" },
+          { label: "Members Directory", href: "/members", icon: Users, colorClass: "text-amber-400", bgClass: "bg-amber-500/15" },
+          { label: "Local Assemblies", href: "/locals", icon: MapPin, colorClass: "text-emerald-400", bgClass: "bg-emerald-500/15" },
+          { label: "Reports & Analytics", href: "/reports", icon: FileText, colorClass: "text-cyan-400", bgClass: "bg-cyan-500/15" },
         ];
       case "PASTOR":
         return [
-          { label: "Dashboard", href: "/pastor/dashboard", icon: LayoutDashboard },
-          { label: "Pastoral Planner", href: "/pastor/planner", icon: Calendar },
-          { label: "Members Directory", href: "/members", icon: Users },
-          { label: "Visitations & Reports", href: "/reports", icon: FileText },
+          { label: "Dashboard", href: "/pastor/dashboard", icon: LayoutDashboard, colorClass: "text-indigo-400", bgClass: "bg-indigo-500/15" },
+          { label: "Pastoral Planner", href: "/pastor/planner", icon: Calendar, colorClass: "text-amber-400", bgClass: "bg-amber-500/15" },
+          { label: "Members Directory", href: "/members", icon: Users, colorClass: "text-emerald-400", bgClass: "bg-emerald-500/15" },
+          { label: "Visitations & Reports", href: "/reports", icon: FileText, colorClass: "text-cyan-400", bgClass: "bg-cyan-500/15" },
         ];
       case "ELDER":
         return [
-          { label: "Dashboard", href: "/elder/dashboard", icon: LayoutDashboard },
-          { label: "Members", href: "/members", icon: Users },
-          { label: "Profile", href: "/profile", icon: UserIcon },
+          { label: "Dashboard", href: "/elder/dashboard", icon: LayoutDashboard, colorClass: "text-indigo-400", bgClass: "bg-indigo-500/15" },
+          { label: "Assembly Roster", href: "/members", icon: Users, colorClass: "text-amber-400", bgClass: "bg-amber-500/15" },
+          { label: "My Profile", href: "/profile", icon: UserIcon, colorClass: "text-purple-400", bgClass: "bg-purple-500/15" },
         ];
       case "DATA_OFFICER":
         return [
-          { label: "Dashboard", href: "/data-officer/dashboard", icon: LayoutDashboard },
-          { label: "Register Member", href: "/data-officer/members/register", icon: UserPlus },
-          { label: "My Members", href: "/data-officer/members", icon: Users },
-          { label: "Profile", href: "/profile", icon: UserIcon },
+          { label: "Dashboard", href: "/data-officer/dashboard", icon: LayoutDashboard, colorClass: "text-indigo-400", bgClass: "bg-indigo-500/15" },
+          { label: "Register Member", href: "/data-officer/members/register", icon: UserPlus, colorClass: "text-emerald-400", bgClass: "bg-emerald-500/15" },
+          { label: "My Registered Members", href: "/data-officer/members", icon: Users, colorClass: "text-amber-400", bgClass: "bg-amber-500/15" },
+          { label: "My Profile", href: "/profile", icon: UserIcon, colorClass: "text-purple-400", bgClass: "bg-purple-500/15" },
         ];
       default:
         return [];
@@ -91,12 +95,12 @@ export default function Sidebar() {
 
   const navItems = getNavItems((user?.role as UserRole) ?? null);
 
-  // F. Robust full name fallback
   const fullName = user
     ? [user.firstName, user.lastName].filter(Boolean).join(" ") || "User"
     : "User";
 
-  // G. Robust initials generation
+  const firstNameOnly = user?.firstName || "User";
+
   const initials =
     [user?.firstName?.[0], user?.lastName?.[0]]
       .filter(Boolean)
@@ -110,25 +114,39 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* 📱 Mobile Top Header Toggle Bar (< 768px) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#0B1120]/95 backdrop-blur-md border-b border-[#1E2D4A] z-40 px-4 flex items-center justify-between">
+      {/* 📱 Mobile Top Navigation Header (< 768px) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0B1120]/95 backdrop-blur-md border-b border-[#1E2D4A] z-40 px-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 rounded-xl bg-[#151F32] border border-[#1E2D4A] text-white active:scale-95 transition"
-            aria-label="Toggle navigation menu"
+            className="p-2.5 rounded-xl bg-[#151F32] border border-[#1E2D4A] text-white active:scale-95 transition"
+            aria-label="Open Navigation Menu"
           >
             <Menu size={20} />
           </button>
-
-          {/* H. Clickable Brand Logo */}
-          <Link href="/" className="font-black text-base text-blue-500 hover:text-blue-400 transition">
+          <Link href="/" className="font-black text-lg text-blue-500">
             Shepherd
           </Link>
         </div>
+
+        <Link href="/profile" className="flex items-center gap-2">
+          {user?.picture ? (
+            <Image
+              src={user.picture}
+              alt={fullName}
+              width={34}
+              height={34}
+              className="rounded-full ring-2 ring-blue-500/50 object-cover"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center ring-2 ring-blue-500/50">
+              {initials}
+            </div>
+          )}
+        </Link>
       </div>
 
-      {/* 📱 Mobile Drawer Backdrop */}
+      {/* 📱 Mobile Drawer Backdrop Overlay */}
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
@@ -138,62 +156,46 @@ export default function Sidebar() {
 
       {/* 🖥️ Desktop Sticky Sidebar / 📱 Mobile Slide-in Drawer */}
       <aside
-        className={`fixed md:sticky top-0 z-50 h-screen w-[280px] max-w-[85vw] md:w-72 bg-[#0B1120] border-r border-[#1E2D4A] p-4 flex flex-col justify-between text-white select-none transition-transform duration-300 ease-in-out shrink-0 ${
+        className={`fixed md:sticky top-0 z-50 h-screen w-[290px] max-w-[85vw] md:w-72 bg-[#0B1120] border-r border-[#1E2D4A]/80 p-5 flex flex-col justify-between text-white select-none transition-transform duration-300 ease-in-out shrink-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div className="space-y-6">
-          {/* Brand Header */}
-          <div className="px-3 pt-2 flex items-center justify-between">
-            <div>
-              {/* H. Clickable Brand Logo on Sidebar */}
-              <Link
-                href="/"
-                className="font-black text-xl tracking-wider text-blue-500 hover:text-blue-400 transition flex items-center gap-2"
-              >
-                Shepherd
-              </Link>
-              <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-0.5">
-                Buoho District
-              </p>
-            </div>
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="md:hidden p-1.5 rounded-lg bg-[#151F32] text-slate-400 hover:text-white"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          {/* Dynamic Authenticated User Profile Card */}
-          <div className="p-3.5 rounded-2xl bg-[#151F32] border border-[#1E2D4A] flex items-center gap-3">
-            {user?.picture ? (
-              <Image
-                src={user.picture}
-                alt={fullName}
-                width={40}
-                height={40}
-                className="rounded-xl border border-blue-500/30 object-cover aspect-square"
-              />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-sm text-white shrink-0">
-                {initials}
-              </div>
-            )}
+        <div className="space-y-6 overflow-y-auto pr-1">
+          {/* 1. TOP PROFILE HEADER (Matches exact layout in image) */}
+          <div className="flex items-center gap-3.5 pt-2">
+            <Link href="/profile" className="relative shrink-0">
+              {user?.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={fullName}
+                  width={52}
+                  height={52}
+                  className="rounded-full ring-2 ring-blue-500 object-cover aspect-square"
+                />
+              ) : (
+                <div className="h-13 w-13 rounded-full bg-blue-600 text-white font-bold text-base flex items-center justify-center ring-2 ring-blue-500">
+                  {initials}
+                </div>
+              )}
+            </Link>
 
             <div className="overflow-hidden space-y-0.5">
-              <h4 className="font-bold text-xs text-white truncate">{fullName}</h4>
-              <span className="inline-block text-[9px] font-extrabold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 uppercase">
-                {user?.role ? user.role.replace("_", " ") : "GUEST"}
-              </span>
+              <h3 className="font-bold text-base text-white truncate leading-tight">
+                {firstNameOnly}
+              </h3>
+              <Link
+                href="/profile"
+                className="text-xs text-slate-400 hover:text-blue-400 transition block font-medium"
+              >
+                View Profile
+              </Link>
             </div>
           </div>
 
-          {/* E. Navigation Items with Active Route State */}
-          <nav className="space-y-1">
-            {navItems.map((item) => {
+          {/* 2. NAVIGATION MATRIX WITH ROUNDED COLOR ICON SQUARES */}
+          <nav className="space-y-2 pt-2">
+            {navItems.map((item, index) => {
               const Icon = item.icon;
-
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/" &&
@@ -206,30 +208,57 @@ export default function Sidebar() {
                   ));
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                      : "text-slate-400 hover:bg-[#151F32] hover:text-white"
-                  }`}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </Link>
+                <div key={item.href}>
+                  {/* Divider line before lower menu tier */}
+                  {index === 3 && (
+                    <div className="my-3 border-t border-[#1E2D4A]/60" />
+                  )}
+
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3.5 px-3 py-2.5 rounded-2xl transition-all ${
+                      isActive
+                        ? "bg-[#151F32] border border-[#1E2D4A] shadow-md"
+                        : "hover:bg-[#151F32]/60"
+                    }`}
+                  >
+                    {/* Color Accent Icon Box */}
+                    <div
+                      className={`h-10 w-10 rounded-xl ${item.bgClass} ${item.colorClass} flex items-center justify-center shrink-0 shadow-inner`}
+                    >
+                      <Icon size={20} />
+                    </div>
+
+                    <span
+                      className={`text-xs font-bold ${
+                        isActive ? `${item.colorClass}` : "text-slate-300"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </div>
               );
             })}
           </nav>
         </div>
 
-        {/* I. Sign Out Button */}
-        <div className="pt-4 border-t border-[#1E2D4A]">
+        {/* 3. BOTTOM ACTIONS (Close Menu / Sign Out) */}
+        <div className="pt-4 border-t border-[#1E2D4A]/80 space-y-2">
+          {/* Mobile Close Button */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-slate-400 hover:text-white transition"
+          >
+            <ChevronLeft size={16} /> Close Menu
+          </button>
+
+          {/* Sign Out Button */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/20 transition"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 py-2.5 text-xs font-bold text-red-400 hover:bg-red-500/20 active:scale-98 transition"
           >
-            <LogOut size={16} /> Sign Out
+            <LogOut size={14} /> Sign Out
           </button>
         </div>
       </aside>
